@@ -7,6 +7,7 @@ body {
     height: 200px;
     width: 200px;
     position: fixed;
+    left: 300px;
     z-index: 1;
 }
 
@@ -15,7 +16,7 @@ body {
     height: 200px;
     width: 200px;
     position: fixed;
-    left: 300px;
+    left: 600px;
     z-index: 1;
 }
 
@@ -24,14 +25,44 @@ body {
     height: 200px;
     width: 200px;
     position: fixed;
-    left: 600px;
+    left: 700px;
     z-index: 1;
+}
+
+ul {
+    list-style-type: none;
+}
+
+#nav {
+    position: fixed;
+    top: 50%;
+    right: 10%;
+    margin-top: -150px;
+    z-index: 2000;
+}
+
+#nav-item1 {
+    background-color: red;
+    height: 100px;
+    width: 100px;
+}
+
+#nav-item2 {
+    background-color: blue;
+    height: 100px;
+    width: 100px;
+}
+
+#nav-item3 {
+    background-color: yellow;
+    height: 100px;
+    width: 100px;
 }
 
 #foreground1 {
     background-color: lightgrey;
     height: 1200px;
-    width: 1000px;
+    width: 100%;
     position: absolute;
     z-index: 1000;
 }
@@ -39,7 +70,7 @@ body {
 #foreground2 {
     background-color: lightgrey;
     height: 1200px;
-    width: 1000px;
+    width: 100%;
     position: absolute;
     top: 2400px;
     z-index: 1000;
