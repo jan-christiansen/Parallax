@@ -3,9 +3,9 @@
 module Parallax where
 
 
-import Language.Fay.Prelude
-import Language.Fay.FFI
-import Language.Fay.JQuery
+import Prelude
+import FFI
+import JQuery
 
 
 movement :: Double -> Double -> Double -> Double -> Maybe Double
