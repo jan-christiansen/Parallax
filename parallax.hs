@@ -7,24 +7,32 @@ import Prelude
 import FFI
 import JQuery
 
+type DataName = String
+type Class = String
 
-movement :: Double -> Double -> Double -> Double -> Maybe Double
-movement startY endY speed y
-  | y >= startY || y <= endY = Just (speed * (y - startY))
-  | otherwise                = Nothing
+movableClass :: Class
+movableClass = ".movable"
 
-object1 :: (String, Double -> Maybe Double)
-object1 = ("#object1", movement 1033 2600 1.2)
+navItemClass :: Class
+navItemClass = ".navItem"
 
-object2 :: (String, Double -> Maybe Double)
-object2 = ("#object2", movement 800 2600 0.5)
+scrollPositionData :: DataName
+scrollPositionData = "scrollpos"
 
-object3 :: (String, Double -> Maybe Double)
-object3 = ("#object3", movement 1066 2600 2)
+speedData :: DataName
+speedData = "speed"
 
-objects :: [(String, Double -> Maybe Double)]
-objects = [object1, object2, object3]
+offsetData :: DataName
+offsetData = "offset"
 
+visibilityData :: DataName
+visibilityData = "vis"
+
+endYData :: DataName
+endYData = "end"
+
+startYData :: DataName
+startYData = "start"
 
 main :: Fay ()
 main = documentReady onReady document
@@ -33,46 +41,80 @@ onReady :: Event -> Fay ()
 onReady _ = do
   win <- selectElement window
   scroll onScroll win
-  mapM_ (uncurry addScrollAnimation) navItemEvents
-
+  triggerScroll win
+  navItemEvents <- select navItemClass
+  each (addScrollAnimation scrollSpeed) navItemEvents
+  return ()
+ where
+  scrollSpeed = 0.5
 
 -- Scroll Animation
 
-scrollSpeed :: Double
-scrollSpeed = 0.5
-
-navItemEvents :: [(String, Double)]
-navItemEvents = [("#nav-item1", 100), ("#nav-item2", 1250), ("#nav-item3", 2400)]
-
-addScrollAnimation :: String -> Double -> Fay JQuery
-addScrollAnimation elementName position =
-  select elementName >>= click onClick
+addScrollAnimation :: Double -> Double -> Element -> Fay Bool
+addScrollAnimation scrollSpeed _ element =
+  selectElement element >>= click onClick >> return True
  where
   onClick _ = do
-    body <- select "body"
-    oldPosition <- getScrollTop body
+    bodyElem <- body
+    oldPosition <- getScrollTop bodyElem
+    object <- selectElement element
+    position <- getDataDouble scrollPositionData object
     let duration = abs (oldPosition - position) * scrollSpeed
-    animateScrollTop position duration body
+    animateScrollTop position duration bodyElem
 
 
 -- Scroll Event Processing
 
 onScroll :: Event -> Fay ()
-onScroll _ = mapM_ processObject objects
-
-processObject :: (String, Double -> Maybe Double) -> Fay ()
-processObject (objectName, objectMovement) = do
+onScroll _ = do
   win <- selectElement window
   pos <- getScrollTop win
-  object <- select objectName
-  case objectMovement pos of
-       Nothing -> hide Instantly object >> return ()
+  movableObjects <- select movableClass
+  each (placeElement pos) movableObjects
+  return ()
+
+data Visibility = Always
+                | Range Double Double
+
+movement :: Visibility -> Double -> Double -> Double -> Maybe Double
+movement Always speed c y = Just (speed * y + c)
+movement (Range startY endY) speed c y
+  | y >= startY && y <= endY = Just (speed * y + c)
+  | otherwise                = Nothing
+
+placeElement :: Double -> Double -> Element -> Fay Bool
+placeElement yPos _ element = do
+  object <- selectElement element
+  speed <- getDataDouble speedData object
+  offset <- getDataDouble offsetData object
+  vis <- getVisibility object
+  case movement vis speed offset yPos of
+       Nothing -> do
+         hide Instantly object
+         return ()
        Just y -> do
          jshow Instantly object
          setPositionY y object
+  return True
 
+
+getVisibility :: JQuery -> Fay Visibility
+getVisibility obj = do
+  visibility <- getData visibilityData obj
+  case visibility of
+    "always" -> return Always
+    "range"  -> do
+      start <- getDataDouble startYData obj
+      end   <- getDataDouble endYData obj
+      return (Range start end)
 
 -- FFI
+
+getData :: String -> JQuery -> Fay String
+getData = ffi "%2.data(%1)"
+
+getDataDouble :: String -> JQuery -> Fay Double
+getDataDouble = ffi "%2.data(%1)"
 
 setPositionY :: Double -> JQuery -> Fay ()
 setPositionY = ffi "%2.css(\"top\", %1)"
@@ -80,9 +122,14 @@ setPositionY = ffi "%2.css(\"top\", %1)"
 animateScrollTop :: Double -> Double -> JQuery -> Fay ()
 animateScrollTop = ffi "%3.animate({'scrollTop': %1}, %2)"
 
+triggerScroll :: JQuery -> Fay ()
+triggerScroll = ffi "%1['trigger']('scroll')"
+
+body :: Fay JQuery
+body = select "body"
+
 window :: Element
 window = ffi "window"
 
 document :: Document
 document = ffi "document"
-

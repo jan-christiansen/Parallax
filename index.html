@@ -9,21 +9,22 @@
 <script type="text/javascript" src="jquery.min.js"></script>
 <script type="text/javascript" src="parallax.js"></script>
 
-<div id="foreground1"></div>
+<!-- <div id="foreground1"></div> -->
 
-<div id="object1"></div>
-<div id="object2"></div>
-<div id="object3"></div>
+<div id="object1" class="movable" data-speed="-1.2" data-offset="500" data-vis="always"></div>
+<div id="object2" class="movable" data-speed="0.5" data-offset="0" data-vis="range"
+  data-start="400" data-end="1250"></div>
+<div id="object3" class="movable" data-speed="-2" data-offset="4750" data-vis="always"></div>
 
 <div id="nav">
   <ul>
-    <li><div id="nav-item1"/></li>
-    <li><div id="nav-item2"/></li>
-    <li><div id="nav-item3"/></li>
+    <li><div id="nav-item1" class="navItem" data-scrollpos="100"/></li>
+    <li><div id="nav-item2" class="navItem" data-scrollpos="1250"/></li>
+    <li><div id="nav-item3" class="navItem" data-scrollpos="2400"/></li>
   </ul>
 </div>
 
-<div id="foreground2"></div>
+<!-- <div id="foreground2"></div> -->
 
 </body>
 
